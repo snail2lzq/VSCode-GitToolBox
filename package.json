@@ -1,0 +1,106 @@
+{
+  "name": "vscode-gittoolbox",
+  "displayName": "GitToolBox",
+  "description": "Git productivity tools for VS Code, inspired by GitToolBox for IntelliJ IDEA.",
+  "version": "0.0.1",
+  "private": true,
+  "publisher": "local-dev",
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.95.0",
+    "node": ">=22.19.0"
+  },
+  "categories": ["SCM Providers", "Other"],
+  "keywords": ["git", "gittoolbox", "blame"],
+  "main": "./dist/extension.js",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": true },
+    "virtualWorkspaces": { "supported": true }
+  },
+  "contributes": {
+    "configuration": {
+      "title": "GitToolBox",
+      "properties": {
+        "gittoolbox.inlineBlame.enabled": {
+          "type": "boolean", "default": true, "scope": "resource",
+          "description": "在当前行末尾显示最近一次修改的作者和时间。"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "gittoolbox", "title": "GitToolBox", "icon": "resources/gittoolbox.svg" }
+      ],
+      "panel": [
+        { "id": "gittoolbox-control", "title": "Git Control", "icon": "resources/gittoolbox.svg" }
+      ]
+    },
+    "views": {
+      "gittoolbox-control": [
+        { "id": "gittoolbox.gitControl", "name": "Git Control", "type": "webview", "icon": "resources/gittoolbox.svg" }
+      ],
+      "gittoolbox": [
+        { "id": "gittoolbox.commit", "name": "Commit", "type": "webview", "icon": "resources/gittoolbox.svg", "initialSize": 8 },
+        { "id": "gittoolbox.repositories", "name": "仓库", "icon": "resources/gittoolbox.svg", "visibility": "collapsed" },
+        { "id": "gittoolbox.actions", "name": "快捷操作", "icon": "resources/gittoolbox.svg", "visibility": "collapsed" }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "gittoolbox.repositories",
+        "contents": "查看当前项目的分支、改动和最近提交。\n[打开文件夹](command:vscode.openFolder)\n[打开源代码管理](command:workbench.view.scm)",
+        "when": "workbenchState == empty"
+      },
+      {
+        "view": "gittoolbox.repositories",
+        "contents": "打开包含 Git 仓库的文件夹，或通过源代码管理检查 Git 状态。\n[打开源代码管理](command:workbench.view.scm)\n[重试](command:gittoolbox.refresh)",
+        "when": "workbenchState != empty"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        { "command": "gittoolbox.openControl", "when": "view == gittoolbox.repositories || view == gittoolbox.commit", "group": "navigation@0" },
+        { "command": "gittoolbox.refresh", "when": "view == gittoolbox.repositories", "group": "navigation@1" },
+        { "command": "gittoolbox.openSettings", "when": "view == gittoolbox.repositories", "group": "navigation@2" }
+      ]
+    },
+    "keybindings": [
+      { "command": "gittoolbox.openCommit", "key": "ctrl+k", "mac": "cmd+k", "when": "!terminalFocus && !inQuickOpen" }
+    ],
+    "commands": [
+      { "command": "gittoolbox.openControl", "title": "Git Control", "category": "GitToolBox", "icon": "$(git-branch)" },
+      { "command": "gittoolbox.openCommit", "title": "Commit Changes", "category": "GitToolBox", "icon": "$(git-commit)" },
+      { "command": "gittoolbox.open", "title": "Open GitToolBox", "category": "GitToolBox" },
+      { "command": "gittoolbox.refresh", "title": "刷新仓库状态", "category": "GitToolBox", "icon": "$(refresh)" },
+      { "command": "gittoolbox.openSettings", "title": "打开 Git 设置", "category": "GitToolBox", "icon": "$(settings-gear)" },
+      {
+        "command": "gittoolbox.showStatus",
+        "title": "Show Status",
+        "category": "GitToolBox"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run check && npm test && npm run build",
+    "check": "npm run typecheck && npm run lint",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node esbuild.mjs --production",
+    "watch": "node esbuild.mjs --watch",
+    "prepackage": "node -e \"require('node:fs').mkdirSync('artifacts', { recursive: true })\"",
+    "package": "vsce package --allow-missing-repository --skip-license --out artifacts/"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.0",
+    "@types/vscode": "1.95.0",
+    "@vscode/vsce": "^3.7.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.0.0",
+    "jsdom": "^27.0.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1"
+  }
+}
